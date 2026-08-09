@@ -1,0 +1,110 @@
+<Window x:Class="GraphViewerApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        mc:Ignorable="d"
+        Title="XLink Graph Viewer" Height="800" Width="1200"
+        WindowStartupLocation="CenterScreen">
+    
+    <Window.Resources>
+        <Style x:Key="ToolbarButtonStyle" TargetType="Button">
+            <Setter Property="Margin" Value="5,0"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Background" Value="#2196F3"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="3"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#1976D2"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" Value="#CCCCCC"/>
+                    <Setter Property="Cursor" Value="Arrow"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <Border Grid.Row="0" Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="10">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Layout:" VerticalAlignment="Center" Margin="5,0" FontWeight="SemiBold"/>
+                <ComboBox x:Name="LayoutComboBox" Width="150" Margin="5,0" SelectedIndex="0"
+                          SelectionChanged="LayoutComboBox_SelectionChanged">
+                    <ComboBoxItem Content="Force Directed (CoSE)"/>
+                    <ComboBoxItem Content="Hierarchical"/>
+                    <ComboBoxItem Content="Circular"/>
+                    <ComboBoxItem Content="Grid"/>
+                    <ComboBoxItem Content="Concentric"/>
+                    <ComboBoxItem Content="Breadthfirst"/>
+                </ComboBox>
+
+                <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="10,0"/>
+
+                <Button Content="Load Sample Data" Style="{StaticResource ToolbarButtonStyle}"
+                        Click="LoadSampleData_Click"/>
+                <Button Content="Load JSON File" Style="{StaticResource ToolbarButtonStyle}"
+                        Click="LoadJsonFile_Click"/>
+                <Button Content="Export PNG" Style="{StaticResource ToolbarButtonStyle}"
+                        Click="ExportPng_Click" IsEnabled="{Binding HasData}"/>
+                <Button Content="Fit to View" Style="{StaticResource ToolbarButtonStyle}"
+                        Click="FitToView_Click" IsEnabled="{Binding HasData}"/>
+                <Button Content="Reset Zoom" Style="{StaticResource ToolbarButtonStyle}"
+                        Click="ResetZoom_Click" IsEnabled="{Binding HasData}"/>
+
+                <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="10,0"/>
+
+                <TextBlock Text="Search:" VerticalAlignment="Center" Margin="5,0" FontWeight="SemiBold"/>
+                <TextBox x:Name="SearchTextBox" Width="200" Margin="5,0" 
+                         KeyUp="SearchTextBox_KeyUp" 
+                         IsEnabled="{Binding HasData}"/>
+            </StackPanel>
+        </Border>
+
+        <!-- WebView2 Control -->
+        <wv2:WebView2 x:Name="GraphWebView" Grid.Row="1" 
+                      Source="about:blank"/>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="2" Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="0,1,0,0" Padding="10,5">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <TextBlock x:Name="StatusText" Grid.Column="0" 
+                           Text="Ready. Load data to visualize graph." 
+                           VerticalAlignment="Center"/>
+                
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <TextBlock Text="Nodes: " FontWeight="SemiBold" Margin="10,0,0,0"/>
+                    <TextBlock x:Name="NodeCountText" Text="0" Width="40"/>
+                    <TextBlock Text="Edges: " FontWeight="SemiBold" Margin="10,0,0,0"/>
+                    <TextBlock x:Name="EdgeCountText" Text="0" Width="40"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

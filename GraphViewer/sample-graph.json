@@ -1,0 +1,228 @@
+{
+  "nodes": [
+    {
+      "id": "SITE-PLAN",
+      "label": "SITE-PLAN",
+      "group": "Reference",
+      "referencedByCount": 12,
+      "xrefCount": 0,
+      "filePath": "C:\\Projects\\Campus\\Reference\\SITE-PLAN.dwg"
+    },
+    {
+      "id": "A-101",
+      "label": "A-101 Level 1 Floor Plan",
+      "group": "Architectural",
+      "referencedByCount": 8,
+      "xrefCount": 2,
+      "filePath": "C:\\Projects\\Campus\\Architectural\\A-101.dwg"
+    },
+    {
+      "id": "A-102",
+      "label": "A-102 Level 2 Floor Plan",
+      "group": "Architectural",
+      "referencedByCount": 6,
+      "xrefCount": 2,
+      "filePath": "C:\\Projects\\Campus\\Architectural\\A-102.dwg"
+    },
+    {
+      "id": "A-201",
+      "label": "A-201 Building Sections",
+      "group": "Architectural",
+      "referencedByCount": 2,
+      "xrefCount": 3,
+      "filePath": "C:\\Projects\\Campus\\Architectural\\A-201.dwg"
+    },
+    {
+      "id": "A-301",
+      "label": "A-301 Wall Details",
+      "group": "Architectural",
+      "referencedByCount": 0,
+      "xrefCount": 1,
+      "filePath": "C:\\Projects\\Campus\\Architectural\\A-301.dwg"
+    },
+    {
+      "id": "S-101",
+      "label": "S-101 Structural Plan",
+      "group": "Structural",
+      "referencedByCount": 4,
+      "xrefCount": 2,
+      "filePath": "C:\\Projects\\Campus\\Structural\\S-101.dwg"
+    },
+    {
+      "id": "S-201",
+      "label": "S-201 Foundation Plan",
+      "group": "Structural",
+      "referencedByCount": 2,
+      "xrefCount": 1,
+      "filePath": "C:\\Projects\\Campus\\Structural\\S-201.dwg"
+    },
+    {
+      "id": "S-301",
+      "label": "S-301 Steel Details",
+      "group": "Structural",
+      "referencedByCount": 0,
+      "xrefCount": 2,
+      "filePath": "C:\\Projects\\Campus\\Structural\\S-301.dwg"
+    },
+    {
+      "id": "M-101",
+      "label": "M-101 HVAC Plan",
+      "group": "MEP",
+      "referencedByCount": 3,
+      "xrefCount": 3,
+      "filePath": "C:\\Projects\\Campus\\MEP\\M-101.dwg"
+    },
+    {
+      "id": "E-101",
+      "label": "E-101 Electrical Plan",
+      "group": "MEP",
+      "referencedByCount": 2,
+      "xrefCount": 2,
+      "filePath": "C:\\Projects\\Campus\\MEP\\E-101.dwg"
+    },
+    {
+      "id": "E-201",
+      "label": "E-201 Lighting Plan",
+      "group": "MEP",
+      "referencedByCount": 1,
+      "xrefCount": 2,
+      "filePath": "C:\\Projects\\Campus\\MEP\\E-201.dwg"
+    },
+    {
+      "id": "P-101",
+      "label": "P-101 Plumbing Plan",
+      "group": "MEP",
+      "referencedByCount": 1,
+      "xrefCount": 2,
+      "filePath": "C:\\Projects\\Campus\\MEP\\P-101.dwg"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "A-101",
+      "target": "SITE-PLAN",
+      "label": "xref"
+    },
+    {
+      "id": "e2",
+      "source": "A-101",
+      "target": "A-301",
+      "label": "xref"
+    },
+    {
+      "id": "e3",
+      "source": "A-102",
+      "target": "SITE-PLAN",
+      "label": "xref"
+    },
+    {
+      "id": "e4",
+      "source": "A-102",
+      "target": "A-301",
+      "label": "xref"
+    },
+    {
+      "id": "e5",
+      "source": "A-201",
+      "target": "A-101",
+      "label": "xref"
+    },
+    {
+      "id": "e6",
+      "source": "A-201",
+      "target": "A-102",
+      "label": "xref"
+    },
+    {
+      "id": "e7",
+      "source": "A-201",
+      "target": "S-101",
+      "label": "xref"
+    },
+    {
+      "id": "e8",
+      "source": "S-101",
+      "target": "SITE-PLAN",
+      "label": "xref"
+    },
+    {
+      "id": "e9",
+      "source": "S-101",
+      "target": "A-101",
+      "label": "xref"
+    },
+    {
+      "id": "e10",
+      "source": "S-201",
+      "target": "SITE-PLAN",
+      "label": "xref"
+    },
+    {
+      "id": "e11",
+      "source": "S-301",
+      "target": "S-101",
+      "label": "xref"
+    },
+    {
+      "id": "e12",
+      "source": "S-301",
+      "target": "S-201",
+      "label": "xref"
+    },
+    {
+      "id": "e13",
+      "source": "M-101",
+      "target": "SITE-PLAN",
+      "label": "xref"
+    },
+    {
+      "id": "e14",
+      "source": "M-101",
+      "target": "A-101",
+      "label": "xref"
+    },
+    {
+      "id": "e15",
+      "source": "M-101",
+      "target": "A-102",
+      "label": "xref"
+    },
+    {
+      "id": "e16",
+      "source": "E-101",
+      "target": "A-101",
+      "label": "xref"
+    },
+    {
+      "id": "e17",
+      "source": "E-101",
+      "target": "A-102",
+      "label": "xref"
+    },
+    {
+      "id": "e18",
+      "source": "E-201",
+      "target": "A-101",
+      "label": "xref"
+    },
+    {
+      "id": "e19",
+      "source": "E-201",
+      "target": "A-102",
+      "label": "xref"
+    },
+    {
+      "id": "e20",
+      "source": "P-101",
+      "target": "A-101",
+      "label": "xref"
+    },
+    {
+      "id": "e21",
+      "source": "P-101",
+      "target": "M-101",
+      "label": "xref"
+    }
+  ]
+}

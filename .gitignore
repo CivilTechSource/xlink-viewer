@@ -1,0 +1,52 @@
+## .NET build output
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+*.dll
+*.exe
+*.pdb
+*.cache
+*.user
+*.suo
+
+## NuGet
+*.nupkg
+*.snupkg
+packages/
+project.lock.json
+project.assets.json
+
+## Visual Studio / VS Code / Rider
+.vs/
+.idea/
+*.userprefs
+*.sln.docstates
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+## Build artifacts published as GitHub Releases, not committed
+installer/
+Output/
+publish/
+
+## Working copies and local tooling metadata (not part of the published project)
+XLink V2/
+_MetaData/
+
+## OS noise
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+## Logs and temp
+*.log
+*.tmp
+*.bak

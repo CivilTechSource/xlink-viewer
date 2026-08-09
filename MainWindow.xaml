@@ -1,0 +1,159 @@
+﻿<Window x:Class="XLinkViewer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:XLinkViewer"
+        mc:Ignorable="d"
+        Title="XLink Viewer" Height="700" Width="1200"
+        Icon="Icon.ico">
+    
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <TextBlock Grid.Row="0" Text="DWG External Reference Mapper" 
+                   FontSize="24" FontWeight="Bold" Margin="0,0,0,20" 
+                   HorizontalAlignment="Center"/>
+        
+        <!-- Controls -->
+        <Grid Grid.Row="1" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            
+            <TextBlock Grid.Column="0" Text="Project Folder:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <TextBox Grid.Column="1" Text="{Binding SelectedDirectory}" IsReadOnly="True" 
+                     VerticalAlignment="Center" Margin="0,0,10,0" Padding="5"/>
+            <Button Grid.Column="2" Content="Browse..." Command="{Binding BrowseForFolderCommand}"
+                    Padding="15,5" Margin="0,0,10,0"/>
+            <Button Grid.Column="3" Content="Start Scan" Command="{Binding StartScanCommand}"
+                    Padding="15,5" Margin="0,0,10,0"/>
+            <Button Grid.Column="4" Content="Cancel" Command="{Binding CancelScanCommand}"
+                    Padding="15,5" Margin="0,0,10,0"/>
+            <Button Grid.Column="5" Content="Visualise Connection" Command="{Binding ShowGraphViewCommand}"
+                    Padding="15,5" Margin="0,0,10,0"/>
+            <Button Grid.Column="6" Content="Create Checklist" Command="{Binding CreateChecklistCommand}"
+                    Padding="15,5"
+                    ToolTip="Create revision checklist for selected drawing(s) - Hold Ctrl to select multiple"/>
+        </Grid>
+        
+        <!-- Main Content -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="2*"/>
+            </Grid.ColumnDefinitions>
+            
+            <!-- Left Panel - DWG Files List -->
+            <GroupBox Grid.Column="0" Header="DWG Files" Margin="0,0,5,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <TextBlock Grid.Row="0" Text="Select file(s) to see which drawings reference them (Ctrl+click for multiple):" 
+                               Margin="5" FontStyle="Italic"/>
+                    
+                    <ListBox Grid.Row="1" x:Name="DwgFilesListBox"
+                             ItemsSource="{Binding DwgFiles}" 
+                             SelectedItem="{Binding SelectedFile}"
+                             SelectionMode="Extended"
+                             SelectionChanged="DwgFilesListBox_SelectionChanged"
+                             DisplayMemberPath="FileName"
+                             Margin="5">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="ToolTip">
+                                    <Setter.Value>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding FilePath}" FontWeight="Bold"/>
+                                            <TextBlock Text="{Binding XrefPaths.Count, StringFormat='External References: {0}'}" />
+                                            <TextBlock Text="{Binding ReferencedBy.Count, StringFormat='Referenced by: {0} files'}" />
+                                        </StackPanel>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                    </ListBox>
+                </Grid>
+            </GroupBox>
+            
+            <!-- Splitter -->
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" 
+                          ResizeBehavior="PreviousAndNext" Background="LightGray"/>
+            
+            <!-- Right Panel - Referencing Files -->
+            <GroupBox Grid.Column="2" Header="Files That Reference Selected Drawing" Margin="5,0,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <TextBlock Grid.Row="0" Margin="5" FontStyle="Italic">
+                        <TextBlock.Text>
+                            <Binding Path="SelectedFile.FileName" StringFormat="Select '{0}' to create revision checklist or see referencing files:"/>
+                        </TextBlock.Text>
+                    </TextBlock>
+                    
+                    <ListBox Grid.Row="1" ItemsSource="{Binding ReferencingFiles}" Margin="5">
+                        <ListBox.Style>
+                            <Style TargetType="ListBox">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ReferencingFiles.Count}" Value="0">
+                                        <Setter Property="Background" Value="LightYellow"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ListBox.Style>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" Padding="5"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    
+                    <!-- No references message -->
+                    <TextBlock Grid.Row="1" Text="No files reference this drawing" 
+                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Foreground="Gray" FontStyle="Italic"
+                               Visibility="{Binding ReferencingFiles.Count, Converter={x:Static local:Converters.CountToVisibilityConverter}}"/>
+                    
+                    <TextBlock Grid.Row="2" Text="{Binding ReferencingFiles.Count, StringFormat='Total: {0} referencing files'}"
+                               Margin="5" FontWeight="Bold"/>
+                </Grid>
+            </GroupBox>
+        </Grid>
+        
+        <!-- Status Bar -->
+        <Grid Grid.Row="3" Margin="0,10,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            
+            <StackPanel Grid.Column="0" Orientation="Vertical">
+                <TextBlock Text="{Binding StatusText}" FontWeight="Bold"/>
+                <TextBlock Text="{Binding ProgressText}" Foreground="Gray"/>
+            </StackPanel>
+            
+            <ProgressBar Grid.Column="1" Width="200" Height="20" IsIndeterminate="True"
+                         Visibility="{Binding IsScanning, Converter={x:Static local:Converters.BooleanToVisibilityConverter}}"/>
+        </Grid>
+    </Grid>
+</Window>

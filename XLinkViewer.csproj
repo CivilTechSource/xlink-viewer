@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>XLinkViewer</AssemblyName>
+    <RootNamespace>XLinkViewer</RootNamespace>
+    <ApplicationIcon>Icon.ico</ApplicationIcon>
+    <!-- Self-contained deployment without single file -->
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- GraphViewer is a standalone companion app with its own project file.
+         XLink V2 is a separate working copy. Neither belongs in this project's globs. -->
+    <Compile Remove="V1\**;GraphViewer\**;XLink V2\**" />
+    <EmbeddedResource Remove="V1\**;GraphViewer\**;XLink V2\**" />
+    <None Remove="V1\**;GraphViewer\**;XLink V2\**" />
+    <Page Remove="V1\**;GraphViewer\**;XLink V2\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ACadSharp" Version="3.4.2" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Microsoft.Msagl" Version="1.1.6" />
+    <PackageReference Include="Microsoft.Msagl.GraphViewerGDI" Version="1.1.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Icon.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+</Project>
