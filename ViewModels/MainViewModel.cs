@@ -152,7 +152,7 @@ namespace XLinkViewer.ViewModels
         }
 
         [RelayCommand(CanExecute = nameof(CanShowGraph))]
-        public void ShowGraphView()
+        public async Task ShowGraphView()
         {
             try
             {
@@ -163,8 +163,16 @@ namespace XLinkViewer.ViewModels
                     return;
                 }
 
-                var graph = BuildRelationshipGraph();
-                ShowGraphInNewWindow(graph);
+                // Convert scanned files to graph data format
+                var converter = new GraphDataConverter();
+                var graphData = converter.ConvertFromDwgFileInfo(_scannedFiles);
+
+                // Create and show the graph viewer window
+                var graphWindow = new GraphViewerWindow();
+                graphWindow.Show();
+                
+                // Load the graph data (async to allow window to initialize)
+                await graphWindow.LoadGraphData(graphData);
             }
             catch (Exception ex)
             {

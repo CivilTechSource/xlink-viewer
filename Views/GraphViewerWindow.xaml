@@ -1,0 +1,157 @@
+<Window x:Class="XLinkViewer.Views.GraphViewerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        mc:Ignorable="d"
+        Title="XLink Graph Viewer" Height="800" Width="1200"
+        WindowStartupLocation="CenterScreen">
+    
+    <Window.Resources>
+        <Style x:Key="ToolbarButtonStyle" TargetType="Button">
+            <Setter Property="Margin" Value="5,0"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Background" Value="#2196F3"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="3"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#1976D2"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" Value="#CCCCCC"/>
+                    <Setter Property="Cursor" Value="Arrow"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <Border Grid.Row="0" Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="10">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                <StackPanel Orientation="Horizontal">
+                    <!-- Layout Selection -->
+                    <TextBlock Text="Layout:" VerticalAlignment="Center" Margin="5,0" FontWeight="SemiBold"/>
+                    <ComboBox x:Name="LayoutComboBox" Width="150" Margin="5,0" SelectedIndex="0"
+                              SelectionChanged="LayoutComboBox_SelectionChanged">
+                        <ComboBoxItem Content="Force Directed (CoSE)"/>
+                        <ComboBoxItem Content="Hierarchical"/>
+                        <ComboBoxItem Content="Circular"/>
+                        <ComboBoxItem Content="Grid"/>
+                        <ComboBoxItem Content="Concentric"/>
+                        <ComboBoxItem Content="Breadthfirst"/>
+                    </ComboBox>
+
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="10,0"/>
+
+                    <!-- Highlight Mode -->
+                    <TextBlock Text="Highlight:" VerticalAlignment="Center" Margin="5,0" FontWeight="SemiBold"/>
+                    <ComboBox x:Name="HighlightModeComboBox" Width="120" Margin="5,0" SelectedIndex="2"
+                              SelectionChanged="HighlightMode_SelectionChanged">
+                        <ComboBoxItem Content="Upstream"/>
+                        <ComboBoxItem Content="Downstream"/>
+                        <ComboBoxItem Content="Both"/>
+                    </ComboBox>
+
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="10,0"/>
+
+                    <!-- Filters -->
+                    <TextBlock Text="Filter:" VerticalAlignment="Center" Margin="5,0" FontWeight="SemiBold"/>
+                    <ComboBox x:Name="DisciplineFilterComboBox" Width="130" Margin="5,0" SelectedIndex="0"
+                              SelectionChanged="DisciplineFilter_SelectionChanged">
+                        <ComboBoxItem Content="All"/>
+                        <ComboBoxItem Content="Architectural"/>
+                        <ComboBoxItem Content="Structural"/>
+                        <ComboBoxItem Content="MEP"/>
+                        <ComboBoxItem Content="Reference"/>
+                        <ComboBoxItem Content="Other"/>
+                    </ComboBox>
+
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="10,0"/>
+
+                    <!-- View Options -->
+                    <Button x:Name="ThemeToggleButton" Content="🌙 Dark" Style="{StaticResource ToolbarButtonStyle}"
+                            Click="ToggleTheme_Click" ToolTip="Toggle Light/Dark Theme"/>
+                    <Button Content="Show Orphans" Style="{StaticResource ToolbarButtonStyle}"
+                            Click="ShowOrphans_Click" ToolTip="Highlight isolated nodes"/>
+                    <Button Content="Hide Orphans" Style="{StaticResource ToolbarButtonStyle}"
+                            Click="HideOrphans_Click" ToolTip="Hide isolated nodes"/>
+                    <Button Content="Reset Filters" Style="{StaticResource ToolbarButtonStyle}"
+                            Click="ResetFilters_Click" ToolTip="Clear all filters"/>
+
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="10,0"/>
+
+                    <!-- Export & View Controls -->
+                    <Button Content="Export PNG" Style="{StaticResource ToolbarButtonStyle}"
+                            Click="ExportPng_Click"/>
+                    <Button Content="Export SVG" Style="{StaticResource ToolbarButtonStyle}"
+                            Click="ExportSvg_Click"/>
+                    <Button Content="Fit View" Style="{StaticResource ToolbarButtonStyle}"
+                            Click="FitToView_Click"/>
+                    <Button Content="Reset Zoom" Style="{StaticResource ToolbarButtonStyle}"
+                            Click="ResetZoom_Click"/>
+                    <CheckBox x:Name="EdgeLabelsCheckBox" Content="Edge Labels" IsChecked="True"
+                              VerticalAlignment="Center" Margin="10,0,5,0"
+                              Checked="EdgeLabels_Changed" Unchecked="EdgeLabels_Changed"/>
+
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="10,0"/>
+
+                    <!-- Search -->
+                    <TextBlock Text="Search:" VerticalAlignment="Center" Margin="5,0" FontWeight="SemiBold"/>
+                    <TextBox x:Name="SearchTextBox" Width="200" Margin="5,0" 
+                             KeyUp="SearchTextBox_KeyUp"/>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+
+        <!-- WebView2 Control -->
+        <wv2:WebView2 x:Name="GraphWebView" Grid.Row="1" 
+                      Source="about:blank"/>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="2" Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="0,1,0,0" Padding="10,5">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <TextBlock x:Name="StatusText" Grid.Column="0" 
+                           Text="Loading graph visualization..." 
+                           VerticalAlignment="Center"/>
+                
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <TextBlock Text="Nodes: " FontWeight="SemiBold" Margin="10,0,3,0"/>
+                    <TextBlock x:Name="NodeCountText" Text="0" Width="30"/>
+                    <TextBlock Text="Edges: " FontWeight="SemiBold" Margin="10,0,3,0"/>
+                    <TextBlock x:Name="EdgeCountText" Text="0" Width="30"/>
+                    <TextBlock Text="Most Ref: " FontWeight="SemiBold" Margin="10,0,3,0"/>
+                    <TextBlock x:Name="MostRefText" Text="-" Width="100" TextTrimming="CharacterEllipsis" 
+                               ToolTipService.ShowDuration="10000"/>
+                    <TextBlock Text="Avg Ref: " FontWeight="SemiBold" Margin="10,0,3,0"/>
+                    <TextBlock x:Name="AvgRefText" Text="0" Width="30"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

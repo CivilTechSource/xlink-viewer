@@ -1,227 +1,115 @@
-# XLink Viewer
+# XLink Viewer V2 - With Integrated Graph Visualization
 
-A C# WPF desktop application that scans Project folders containing AutoCAD DWG files to build reverse lookup tables showing external reference (Xref) relationships between drawings.
+This is version 2 of XLink Viewer that integrates the modern Cytoscape.js graph visualization directly into the main application.
 
-## Features
+## What's New in V2
 
-- **Recursive DWG Scanning**: Automatically finds all DWG files in selected project folders
-- **External Reference Detection**: Uses ACadSharp library to read DWG files and extract Xref information without requiring AutoCAD
-- **Reverse Lookup**: Shows which drawings reference a selected file (reverse dependency mapping)
-- **Multi-Drawing Selection**: Select multiple drawings using Ctrl+click to analyze combined impact
-- **Interactive UI**: Browse folders, view file lists, and explore reference relationships
-- **Real-time Progress**: Progress tracking with cancellation support during scanning
-- **Error Handling**: Graceful handling of corrupt or inaccessible DWG files
-- **Graph Visualization**: Interactive MSAGL diagram showing drawing relationships and connections
-- **Revision Checklists**: Generate text or Markdown checklists for single or multiple drawing revisions
+### Integrated Graph Viewer
+- **Modern Visual Graph**: Uses Cytoscape.js via WebView2 for beautiful, interactive graphs
+- **Replaces MSAGL**: The old Microsoft.Msagl graph view has been replaced with a much more visually appealing solution
+- **Same Workflow**: All existing functionality remains - scanning, file selection, checklist generation
+- **Enhanced Visualization**: Multiple layout algorithms, interactive highlighting, search, and export capabilities
 
-## Technology Stack
+###Features Retained from V1
+- DWG file scanning with ACadSharp
+- External reference (Xref) detection
+- Reverse lookup (shows which files reference a selected drawing)
+- Multi-file selection support
+- Context menu integration (right-click on DWG files)
+- Checklist generation for drawing revisions
+- Self-contained deployment
 
-- **Framework**: .NET 10.0 WPF (Windows Presentation Foundation)
-- **Architecture**: MVVM (Model-View-ViewModel) pattern
-- **CAD Library**: ACadSharp 3.4.2 - Pure C# library for reading DWG files
-- **UI Framework**: WPF with Community Toolkit MVVM for commanding and property notifications
-- **Graph Visualization**: Microsoft MSAGL (Automatic Graph Layout)
+### New Graph Features
+- **6 Layout Algorithms**: Force-directed, hierarchical, circular, grid, concentric, breadthfirst
+- **Interactive Nodes**: Click to highlight connections, hover for details
+- **Search**: Find specific files in the graph
+- **Color Coding**: Nodes colored by discipline (Architectural, Structural, MEP)
+- **Dynamic Sizing**: Node size based on reference count
+- **Export**: Save graph as high-resolution PNG
+- **Smooth Animations**: Professional transitions and effects
 
 ## Project Structure
 
 ```
-XLinkViewer/
-├── Models/
-│   ├── DwgFileInfo.cs           # Data model for DWG file information
-│   └── XrefRelationship.cs      # Data model for parent-child relationships
-├── Services/
-│   └── XrefScanner.cs           # Core service using ACadSharp to scan DWG files
-├── ViewModels/
-│   └── MainViewModel.cs         # MVVM ViewModel with UI logic and commands
-├── Views/
-│   ├── ChecklistWindow.xaml     # Revision checklist builder and exporter
-│   └── ChecklistWindow.xaml.cs
-├── GraphViewer/                 # Standalone companion app (separate project)
-│   ├── GraphViewerApp.csproj    # Force-directed graph viewer, WebView2 + D3
-│   └── wwwroot/                 # HTML/JS/CSS for the graph canvas
-├── MainWindow.xaml              # Main UI layout with file lists and controls
-├── MainWindow.xaml.cs           # Code-behind with DataContext setup
-├── Converters.cs                # UI converters for data binding
-├── App.xaml / App.xaml.cs       # Application definition, startup, CLI argument handling
-└── XLinkViewer.csproj           # Project file with NuGet dependencies
+XLink V2/
+├── Models/              # Data models (DwgFileInfo, XrefRelationship)
+├── Services/            # XrefScanner service
+├── ViewModels/          # MainViewModel with MVVM pattern  
+├── Views/               # MainWindow and ChecklistWindow
+├── GraphViewer/         # Integrated graph visualization folder
+│   ├── ViewModels/      # GraphViewModel, GraphData models
+│   ├── Services/        # GraphDataConverter
+│   └── wwwroot/         # HTML/CSS/JS for Cytoscape.js
+├── XLinkViewer.csproj   # Main project with WebView2 package
+└── README.md            # This file
 ```
 
-`GraphViewer/` is an independent prototype with its own project file and its own
-`README.md`. It is not referenced by `XLinkViewer.csproj` and is built separately.
+## Development Status
 
-## Getting Started
+🚧 **IN PROGRESS** - Integration underway
 
-### Prerequisites
+### Integration Checklist
 
-- Windows 10/11
-- .NET 10.0 Runtime or SDK
-- VS Code or Visual Studio (recommended for development)
+- [x] Create XLink V2 folder
+- [x] Copy all source files from V1
+- [x] Copy GraphViewer folder
+- [x] Add WebView2 package reference
+- [x] Exclude GraphViewer from compilation (to avoid conflicts)
+- [ ] Create GraphViewerWindow.xaml for embedded graph
+- [ ] Add GraphDataConverter to convert DwgFileInfo to GraphData
+- [ ] Add "Show Graph View" button to MainWindow
+- [ ] Implement command to launch graph window with scan results
+- [ ] Test integration with real DWG files
+- [ ] Update installer to include wwwroot files
+- [ ] Final testing and documentation
 
-### Installation
+## How to Test
 
-1. Clone or download the project
-2. Restore NuGet packages:
-   ```bash
-   dotnet restore
-   ```
-3. Build the project:
-   ```bash
-   dotnet build
-   ```
-4. Run the application:
-   ```bash
-   dotnet run
-   ```
+### Current Status
+The base XLinkViewer app compiles and runs with all existing features intact.
 
-### Running with VS Code
+```powershell
+cd "XLink V2"
+dotnet run --project XLinkViewer.csproj
+```
 
-1. Open the project folder in VS Code
-2. Press `Ctrl+Shift+P` and run "Tasks: Run Task"
-3. Select "Run XLink Viewer"
+### Next Steps
+Once integration is complete, you'll be able to:
+1. Scan DWG files as usual
+2. Click **"Show Graph View"** button
+3. See beautiful interactive graph of relationships
+4. All existing features (checklist, multi-select) continue working
 
-## Usage Guide
+## Comparison: V1 vs V2
 
-### Basic Workflow
-
-1. **Select Project Folder**: Click "Browse..." to choose folder containing DWG files
-2. **Start Scanning**: Click "Start Scan" to recursively analyze all DWG files
-3. **View Results**: Browse the DWG files list in the left panel
-4. **Explore References**: Select a file to see which other drawings reference it
-5. **Create Checklists**: Use single or multi-selection to generate revision checklists
-6. **Review Details**: Hover over files for tooltip information about references
-
-### Multi-Drawing Checklist Workflow
-
-1. **Single Drawing Checklist**: Select one drawing and click "Create Checklist"
-2. **Multiple Drawing Checklist**: Hold Ctrl and click to select multiple drawings, then click "Create Checklist"
-3. **Review Impact**: The checklist window shows all drawings that reference your selected source drawing(s)
-4. **Select Items**: Choose which dependent drawings to include in your checklist (all selected by default)
-5. **Choose Format**: Select Text (.txt) or Markdown (.md) format
-6. **Generate File**: Save your revision checklist as a downloadable file
-
-### Graph Visualization
-
-Click **"Visualise Connection"** after scanning to open an MSAGL-rendered diagram of the
-drawing relationships. Nodes are colour-coded by how heavily each drawing is referenced:
-
-- **Green**: standalone files (not referenced by anything)
-- **Blue**: moderately referenced
-- **Red**: heavily referenced — changing these has the widest impact
-
-A separate force-directed graph viewer (physics simulation, drag, zoom and pan, dark theme)
-lives in `GraphViewer/` as a standalone prototype. See [GraphViewer/README.md](GraphViewer/README.md).
-
-### Understanding the Interface
-
-- **Left Panel**: List of all discovered DWG files in the project (supports multi-selection with Ctrl+click)
-- **Right Panel**: Shows combined files that reference the currently selected drawing(s)
-- **Control Buttons**: Browse, Start Scan, Cancel, Visualise Connection, and Create Checklist actions
-- **Status Bar**: Displays scan progress, file counts, and error information
-- **Progress Bar**: Animated indicator during scanning operations
-
-### Interpreting Results
-
-- **Referenced by 0 files**: The selected drawing is not used as an Xref by any other drawings
-- **Referenced by X files**: Shows how many drawings include this file as an external reference
-- **Tooltip Information**: Hover over files to see full path, Xref count, and reference statistics
-
-## How It Works
-
-### DWG File Scanning Process
-
-1. **File Discovery**: Recursively searches directory for `*.dwg` files
-2. **ACadSharp Integration**: Opens each DWG file using the ACadSharp library
-3. **Block Record Analysis**: Examines Block Table Records for external reference flags
-4. **Xref Path Extraction**: Extracts file paths from blocks marked with `XRef` flags
-5. **Reverse Mapping**: Builds lookup tables showing which files reference each drawing
-
-### Architecture Design
-
-- **MVVM Pattern**: Separation of UI (View), business logic (ViewModel), and data (Model)
-- **Async Operations**: Non-blocking file scanning with cancellation support
-- **Error Resilience**: Continues scanning even if individual files fail to open
-- **Memory Efficient**: Streams DWG files without loading entire contents into memory
+| Feature | V1 (Original) | V2 (Integrated) |
+|---------|---------------|-----------------|
+| Graph Visualization | MSAGL (basic) | Cytoscape.js (modern) |
+| Visual Quality | ⭐⭐ | ⭐⭐⭐⭐⭐ |
+| Interactivity | Limited | Rich (click, hover, search) |
+| Layout Options | 1 | 6 algorithms |
+| Export | Screenshot | High-res PNG |
+| All V1 Features | ✅ | ✅ Maintained |
 
 ## Dependencies
 
 ### NuGet Packages
+- **ACadSharp** (3.4.2): DWG file reading
+- **CommunityToolkit.Mvvm** (8.4.0): MVVM helpers
+- **Microsoft.Web.WebView2** (1.0.2792.45): Web content embedding
+- **Microsoft.Msagl** (1.1.6): Still included for reference, may be removed later
 
-- **ACadSharp** (3.4.2): Core library for reading AutoCAD DWG files
-- **CommunityToolkit.Mvvm** (8.4.0): MVVM helpers for commands and property notifications
-- **Microsoft.Msagl** (1.1.6): Graph layout engine
-- **Microsoft.Msagl.GraphViewerGDI** (1.1.7): WinForms graph rendering surface, hosted in WPF
+### Framework
+- **.NET 10.0 Windows**: Modern .NET with WPF
+- **WebView2 Runtime**: Usually pre-installed on Windows 10/11
 
-### Framework Dependencies
+## Notes
 
-- **.NET 10.0**: Modern .NET framework with Windows specific features
-- **WPF**: Windows Presentation Foundation for desktop UI
+- Original version remains intact in parent folder
+- This version is for testing the integrated graph viewer
+- Once validated, this can become the main version
+- The GraphViewer folder contains standalone components that are integrated into the main  app
 
-## Development Notes
+## Questions?
 
-### Key Classes
-
-- **XrefScanner**: Core service that uses ACadSharp to read DWG files and extract Xref paths
-- **MainViewModel**: Handles UI logic, file browsing, scanning operations, and data binding
-- **DwgFileInfo**: Model representing a DWG file with its Xrefs and reverse references
-- **XrefRelationship**: Model representing parent-child relationships between drawings
-
-### Error Handling
-
-The application handles common scenarios gracefully:
-- **Corrupt DWG Files**: Logs error and continues with remaining files
-- **Access Denied**: Shows error message for permission-restricted files  
-- **Network Paths**: Works with UNC paths and mapped drives
-- **Large Projects**: Cancellation support for very large folder scans
-
-### Future Enhancement Ideas
-
-- Export dependency reports to CSV/Excel
-- Graph visualization of the entire project structure
-- Support for DXF files in addition to DWG
-- Integration with AutoCAD if available for additional metadata
-- Filtering and search capabilities for large projects
-
-## Troubleshooting
-
-### Common Issues
-
-**Application won't start**
-- Ensure .NET 10.0 runtime is installed
-- Check Windows version compatibility (Windows 10+ required)
-
-**DWG files not being detected**
-- Verify files have `.dwg` extension
-- Check folder permissions and accessibility
-- Ensure files are not corrupted or locked
-
-**Scanning stops with errors**
-- Check the status bar for specific error messages
-- Try scanning a smaller subset of files first
-- Verify DWG files are valid AutoCAD format
-
-**Performance issues**
-- Large projects with hundreds of DWG files may take time
-- Use the Cancel button to stop long-running operations
-- Consider scanning subfolders individually for huge projects
-
-## Contributing
-
-This project uses standard C# coding practices:
-- MVVM architectural pattern
-- Async/await for I/O operations  
-- Proper exception handling and logging
-- WPF data binding and commanding
-
-## License
-
-Released under the [MIT License](LICENSE).
-
-Third-party dependencies carry their own licenses — ACadSharp (MIT), CommunityToolkit.Mvvm
-(MIT), and Microsoft MSAGL (MIT). Review these terms for commercial use.
-
-## Support
-
-For issues related to:
-- **DWG File Reading**: Check ACadSharp documentation and GitHub repository
-- **Application Bugs**: Review error messages in the status bar
-- **Performance**: Monitor system resources during large scans
+See the GraphViewer folder for detailed documentation about the graph visualization component.

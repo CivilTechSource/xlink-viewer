@@ -16,12 +16,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- GraphViewer is a standalone companion app with its own project file.
-         XLink V2 is a separate working copy. Neither belongs in this project's globs. -->
-    <Compile Remove="V1\**;GraphViewer\**;XLink V2\**" />
-    <EmbeddedResource Remove="V1\**;GraphViewer\**;XLink V2\**" />
-    <None Remove="V1\**;GraphViewer\**;XLink V2\**" />
-    <Page Remove="V1\**;GraphViewer\**;XLink V2\**" />
+    <Compile Remove="V1\**" />
+    <Compile Remove="GraphViewer\**" />
+    <EmbeddedResource Remove="V1\**" />
+    <EmbeddedResource Remove="GraphViewer\**" />
+    <None Remove="V1\**" />
+    <None Remove="GraphViewer\**" />
+    <Page Remove="V1\**" />
+    <Page Remove="GraphViewer\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,12 +31,21 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="Microsoft.Msagl" Version="1.1.6" />
     <PackageReference Include="Microsoft.Msagl.GraphViewerGDI" Version="1.1.7" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2792.45" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="Icon.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Copy wwwroot files for web-based graph visualization -->
+    <None Include="GraphViewer\wwwroot\**\*">
+      <Link>GraphViewer\wwwroot\%(RecursiveDir)%(FileName)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

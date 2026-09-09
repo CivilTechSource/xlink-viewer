@@ -1,6 +1,10 @@
 // Global Cytoscape instance
 let cy = null;
 let currentLayout = 'cose';
+let currentTheme = 'light';
+let highlightMode = 'both'; // 'upstream', 'downstream', 'both'
+let showEdgeLabels = true;
+let graphStats = { nodes: 0, edges: 0, mostReferenced: null, leastReferenced: null };
 
 // Initialize Cytoscape
 function initializeCytoscape() {
@@ -108,11 +112,21 @@ function initializeCytoscape() {
         // Interaction settings
         minZoom: 0.1,
         maxZoom: 3,
-        wheelSensitivity: 0.2
+        wheelSensitivity: 0.2,
+        
+        // Enable middle-click pan
+        panningEnabled: true,
+        userPanningEnabled: true,
+        boxSelectionEnabled: false
     });
+
+    // Enable middle-click pan
+    cy.userPanningEnabled(true);
 
     // Setup event handlers
     setupEventHandlers();
+    setupMiddleClickPan();
+    setupDoubleClickActions();
 }
 
 // Setup event handlers for interactions
@@ -148,21 +162,10 @@ function setupEventHandlers() {
         tooltip.style.display = 'none';
     });
 
-    // Node click - highlight connected nodes
+    // Node click - highlight connected nodes based on mode
     cy.on('tap', 'node', function(evt) {
         const node = evt.target;
-        
-        // Reset all
-        cy.elements().removeClass('highlighted dimmed');
-        
-        // Highlight this node and connected elements
-        node.addClass('highlighted');
-        node.connectedEdges().addClass('highlighted');
-        node.neighborhood('node').addClass('highlighted');
-        
-        // Dim everything else
-        cy.nodes().not(node.neighborhood().add(node)).addClass('dimmed');
-        cy.edges().not(node.connectedEdges()).addClass('dimmed');
+        highlightNode(node, highlightMode);
     });
 
     // Click on background - reset highlighting
@@ -184,6 +187,244 @@ function setupEventHandlers() {
         
         cy.elements().not(edge.union(edge.source()).union(edge.target())).addClass('dimmed');
     });
+}
+
+// Setup middle-click pan
+function setupMiddleClickPan() {
+    let isPanning = false;
+    let panStartPos = { x: 0, y: 0 };
+    
+    cy.on('mousedown', function(evt) {
+        if (evt.originalEvent.button === 1) { // Middle mouse button
+            isPanning = true;
+            panStartPos = { x: evt.originalEvent.clientX, y: evt.originalEvent.clientY };
+            evt.originalEvent.preventDefault();
+        }
+    });
+    
+    cy.on('mousemove', function(evt) {
+        if (isPanning) {
+            const dx = evt.originalEvent.clientX - panStartPos.x;
+            const dy = evt.originalEvent.clientY - panStartPos.y;
+            cy.panBy({ x: dx, y: dy });
+            panStartPos = { x: evt.originalEvent.clientX, y: evt.originalEvent.clientY };
+        }
+    });
+    
+    document.addEventListener('mouseup', function(evt) {
+        if (evt.button === 1) {
+            isPanning = false;
+        }
+    });
+}
+
+// Setup double-click actions
+function setupDoubleClickActions() {
+    // Double-click on node to center and zoom
+    cy.on('dbltap', 'node', function(evt) {
+        const node = evt.target;
+        cy.animate({
+            center: { eles: node },
+            zoom: 1.5,
+            duration: 500
+        });
+        evt.stopPropagation();
+    });
+    
+    // Double-click on background to fit all
+    cy.on('dbltap', function(evt) {
+        if (evt.target === cy) {
+            fitToView();
+        }
+    });
+    
+    // Double-click on edge to highlight full path
+    cy.on('dbltap', 'edge', function(evt) {
+        const edge = evt.target;
+        cy.elements().removeClass('highlighted dimmed');
+        edge.addClass('highlighted');
+        edge.source().addClass('highlighted');
+        edge.target().addClass('highlighted');
+        cy.elements().not(edge.union(edge.source()).union(edge.target())).addClass('dimmed');
+        evt.stopPropagation();
+    });
+}
+
+// Highlight node with different modes
+function highlightNode(node, mode = 'both') {
+    // Reset all
+    cy.elements().removeClass('highlighted dimmed');
+    
+    // Highlight the selected node
+    node.addClass('highlighted');
+    
+    let nodesToHighlight = cy.collection().union(node);
+    let edgesToHighlight = cy.collection();
+    
+    if (mode === 'downstream' || mode === 'both') {
+        // Show files that reference this node (incoming edges)
+        const incomers = node.incomers('edge');
+        edgesToHighlight = edgesToHighlight.union(incomers);
+        nodesToHighlight = nodesToHighlight.union(incomers.sources());
+    }
+    
+    if (mode === 'upstream' || mode === 'both') {
+        // Show files this node references (outgoing edges)
+        const outgoers = node.outgoers('edge');
+        edgesToHighlight = edgesToHighlight.union(outgoers);
+        nodesToHighlight = nodesToHighlight.union(outgoers.targets());
+    }
+    
+    // Apply highlighting
+    nodesToHighlight.addClass('highlighted');
+    edgesToHighlight.addClass('highlighted');
+    
+    // Dim everything else
+    cy.nodes().not(nodesToHighlight).addClass('dimmed');
+    cy.edges().not(edgesToHighlight).addClass('dimmed');
+}
+
+// Toggle theme
+function toggleTheme() {
+    currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+    document.body.classList.toggle('dark-theme');
+    
+    // Update graph background
+    const bgColor = currentTheme === 'dark' ? '#1a1a1a' : '#f5f7fa';
+    document.getElementById('cy-container').style.background = 
+        currentTheme === 'dark' ? 
+        'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)' : 
+        'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)';
+    
+    return currentTheme;
+}
+
+// Toggle edge labels
+function toggleEdgeLabels(show) {
+    // If show parameter is provided, use it; otherwise toggle
+    if (show !== undefined) {
+        showEdgeLabels = show;
+    } else {
+        showEdgeLabels = !showEdgeLabels;
+    }
+    cy.edges().style('label', showEdgeLabels ? 'data(label)' : '');
+    return showEdgeLabels;
+}
+
+// Filter by discipline
+function filterByDiscipline(discipline) {
+    if (!cy) return;
+    
+    cy.elements().removeClass('hidden');
+    
+    if (discipline && discipline !== 'all') {
+        cy.nodes().forEach(node => {
+            if (node.data('group') !== discipline) {
+                node.addClass('hidden');
+                node.connectedEdges().addClass('hidden');
+            }
+        });
+    }
+}
+
+// Show only important nodes (referenced by X+ files)
+function filterByImportance(minReferences = 3) {
+    if (!cy) return;
+    
+    cy.elements().removeClass('hidden');
+    
+    cy.nodes().forEach(node => {
+        if (node.data('referencedByCount') < minReferences && node.data('xrefCount') < minReferences) {
+            node.addClass('hidden');
+            node.connectedEdges().addClass('hidden');
+        }
+    });
+}
+
+// Hide isolated nodes (orphans)
+function hideOrphans() {
+    if (!cy) return;
+    
+    cy.nodes().forEach(node => {
+        if (node.degree() === 0) {
+            node.addClass('hidden');
+        }
+    });
+}
+
+// Show isolated nodes
+function showOrphans() {
+    if (!cy) return;
+    
+    cy.nodes().forEach(node => {
+        if (node.degree() === 0) {
+            node.addClass('orphan');
+            node.style('border-color', '#FF0000');
+            node.style('border-width', 4);
+        }
+    });
+}
+
+// Reset all filters
+function resetFilters() {
+    if (!cy) return;
+    cy.elements().removeClass('hidden orphan');
+    cy.nodes().style('border-width', 3);
+}
+
+// Set highlight mode
+function setHighlightMode(mode) {
+    highlightMode = mode;
+    return highlightMode;
+}
+
+// Calculate and return statistics
+function calculateStatistics() {
+    if (!cy) return {
+        visibleNodes: 0,
+        visibleEdges: 0,
+        mostReferenced: "",
+        leastReferenced: "",
+        maxReferences: 0,
+        minReferences: 0,
+        averageReferences: 0
+    };
+    
+    const visibleNodes = cy.nodes(':visible');
+    const visibleEdges = cy.edges(':visible');
+    
+    let maxRef = 0;
+    let minRef = Infinity;
+    let mostRef = "";
+    let leastRef = "";
+    let totalRefs = 0;
+    
+    visibleNodes.forEach(node => {
+        const refCount = node.data('referencedByCount') || 0;
+        totalRefs += refCount;
+        
+        if (refCount > maxRef) {
+            maxRef = refCount;
+            mostRef = node.data('label');
+        }
+        if (refCount < minRef) {
+            minRef = refCount;
+            leastRef = node.data('label');
+        }
+    });
+    
+    // Store in global stats object
+    graphStats = {
+        visibleNodes: visibleNodes.length,
+        visibleEdges: visibleEdges.length,
+        mostReferenced: mostRef,
+        leastReferenced: leastRef,
+        maxReferences: maxRef,
+        minReferences: minRef === Infinity ? 0 : minRef,
+        averageReferences: visibleNodes.length > 0 ? totalRefs / visibleNodes.length : 0
+    };
+    
+    return graphStats;
 }
 
 // Load graph data from C# application
@@ -227,6 +468,9 @@ function loadGraphData(graphData) {
 
     // Apply layout
     applyLayout(currentLayout);
+    
+    // Calculate statistics
+    calculateStatistics();
 }
 
 // Get node color based on properties
@@ -323,19 +567,40 @@ function resetZoom() {
 }
 
 // Export as PNG
-function exportPng() {
+function exportPng(options = {}) {
     if (cy) {
-        const png = cy.png({
+        const defaultOptions = {
             output: 'blob',
-            bg: 'white',
+            bg: options.includeBackground !== false ? 'white' : 'transparent',
             full: true,
-            scale: 2
-        });
+            scale: options.scale || 2
+        };
+        
+        const png = cy.png(defaultOptions);
         
         const url = URL.createObjectURL(png);
         const link = document.createElement('a');
         link.href = url;
         link.download = 'xlink-graph.png';
+        link.click();
+        URL.revokeObjectURL(url);
+    }
+}
+
+// Export as SVG
+function exportSvg(options = {}) {
+    if (cy) {
+        const svgContent = cy.svg({
+            full: true,
+            scale: options.scale || 1,
+            bg: options.includeBackground !== false ? 'white' : 'transparent'
+        });
+        
+        const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'xlink-graph.svg';
         link.click();
         URL.revokeObjectURL(url);
     }
