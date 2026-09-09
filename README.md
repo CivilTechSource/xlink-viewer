@@ -1,8 +1,8 @@
-# XLink Viewer V2 - With Integrated Graph Visualization
+# XLink Viewer - With Integrated Graph Visualization
 
 This is version 2 of XLink Viewer that integrates the modern Cytoscape.js graph visualization directly into the main application.
 
-## What's New in V2
+## What's New in v2
 
 ### Integrated Graph Viewer
 - **Modern Visual Graph**: Uses Cytoscape.js via WebView2 for beautiful, interactive graphs
